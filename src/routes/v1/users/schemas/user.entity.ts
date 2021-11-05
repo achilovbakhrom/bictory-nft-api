@@ -19,6 +19,13 @@ export default class UserEntity {
   readonly password: string = '';
 
   @ApiProperty({ type: String, maxLength: 64 })
+  @Column({ nullable: true })
+  public twoFactorAuthenticationSecret?: string;
+
+  @Column({ default: false })
+  public isTwoFactorAuthenticationEnabled: boolean = false;
+
+  @ApiProperty({ type: String, maxLength: 64 })
   @Column({ length: 64 })
   @Index({ unique: true })
   readonly email: string = '';

@@ -4,4 +4,5 @@ export interface ValidateUserOutput {
   id: number;
   email?: string;
   role?: RolesEnum;
+  twoFactorAuthenticationSecret?: string;
 }

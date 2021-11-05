@@ -7,6 +7,8 @@ export interface DecodedUser {
 
   readonly role: string;
 
+  readonly twoFactorAuthenticationCode?: string;
+
   readonly iat?: number;
 
   readonly exp?: number;

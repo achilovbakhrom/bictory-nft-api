@@ -38,6 +38,7 @@ export default class AuthService {
         id: user.id,
         email: user.email,
         role: user.role,
+        twoFactorAuthenticationSecret: user.twoFactorAuthenticationSecret,
       };
     }
 

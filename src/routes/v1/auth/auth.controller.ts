@@ -13,6 +13,8 @@ import {
   ForbiddenException,
   HttpStatus,
   UseInterceptors,
+  Res,
+  Req,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -40,6 +42,7 @@ import UserEntity from '@v1/users/schemas/user.entity';
 import WrapResponseInterceptor from '@interceptors/wrap-response.interceptor';
 import AuthBearer from '@decorators/auth-bearer.decorator';
 import { Roles, RolesEnum } from '@decorators/roles.decorator';
+import { TwoFactorAuthenticationService } from '@v1/users/twoFactorAuthentication.service';
 import authConstants from './auth-constants';
 import { DecodedUser } from './interfaces/decoded-user.interface';
 import LocalAuthGuard from './guards/local-auth.guard';
@@ -49,6 +52,10 @@ import SignInDto from './dto/sign-in.dto';
 import SignUpDto from './dto/sign-up.dto';
 import JwtTokensDto from './dto/jwt-tokens.dto';
 import ResponseUtils from '../../../utils/response.utils';
+
+interface RequestWithUser extends Request {
+  user: UserEntity;
+}
 
 @ApiTags('Auth')
 @UseInterceptors(WrapResponseInterceptor)
@@ -60,6 +67,7 @@ export default class AuthController {
     private readonly jwtService: JwtService,
     private readonly usersService: UsersService,
     private readonly mailerService: MailerService,
+    private readonly twoFactorAuthenticationService: TwoFactorAuthenticationService,
   ) {}
 
   @ApiBody({ type: SignInDto })
@@ -184,6 +192,13 @@ export default class AuthController {
     return ResponseUtils.success('auth', { message: 'Success! Now you can login!' });
   }
 
+  @Post('2fa/generate')
+  @UseGuards(JwtAccessGuard)
+  async register(@Req() request: RequestWithUser) {
+    const { otpauthUrl } = await this.twoFactorAuthenticationService.generateTwoFactorAuthenticationSecret(request.user);
+    return ResponseUtils.success('generated_2fa', { otpauthUrl });
+  }
+
   @ApiOkResponse({
     schema: {
       type: 'object',
@@ -214,6 +229,45 @@ export default class AuthController {
     },
     description: '500. InternalServerError ',
   })
+
+  @Post('2fa/turn-on')
+  @HttpCode(200)
+  @UseGuards(JwtAccessGuard)
+  async turnOnTwoFactorAuthentication(
+    @Req() request: RequestWithUser,
+    @Body() { twoFactorAuthenticationCode } : { twoFactorAuthenticationCode: string },
+  ) {
+    const isCodeValid = await this.twoFactorAuthenticationService.isTwoFactorAuthenticationCodeValid(
+      twoFactorAuthenticationCode, request.user,
+    );
+    if (!isCodeValid) {
+      throw new UnauthorizedException('Wrong authentication code');
+    }
+    await this.usersService.turnOnTwoFactorAuthentication(request.user.id);
+    return ResponseUtils.success('2fa-turn-on', {
+      turnedOn: true,
+    });
+  }
+
+  @Post('2fa/authenticate')
+  @HttpCode(200)
+  @UseGuards(JwtAccessGuard)
+  async authenticate(
+    @Req() request: RequestWithUser,
+    @Body() { twoFactorAuthenticationCode } : { twoFactorAuthenticationCode: string },
+  ) {
+    const isCodeValid = await this.twoFactorAuthenticationService.isTwoFactorAuthenticationCodeValid(
+      twoFactorAuthenticationCode, request.user,
+    );
+    if (!isCodeValid) {
+      throw new UnauthorizedException('Wrong authentication code');
+    }
+    return ResponseUtils.success(
+      'tokens',
+      await this.authService.login(request.user),
+    );
+  }
+
   @ApiBearerAuth()
   @Post('refresh-token')
   async refreshToken(

@@ -3,12 +3,12 @@ import * as bcrypt from 'bcrypt';
 import { Injectable } from '@nestjs/common';
 
 import SignUpDto from '@v1/auth/dto/sign-up.dto';
-import UsersRepository from './users.repository';
 import { UpdateResult } from 'typeorm/index';
-import UserEntity from './schemas/user.entity';
-import UpdateUserDto from './dto/update-user.dto';
 import { PaginationParamsInterface } from '@interfaces/pagination-params.interface';
 import { PaginatedUsersInterface } from '@interfaces/paginatedEntity.interface';
+import UsersRepository from './users.repository';
+import UserEntity from './schemas/user.entity';
+import UpdateUserDto from './dto/update-user.dto';
 
 @Injectable()
 export default class UsersService {
@@ -32,7 +32,7 @@ export default class UsersService {
     return this.usersRepository.getVerifiedUserByEmail(email);
   }
 
-  public getUnverifiedUserByEmail(email: string): Promise<UserEntity | undefined>  {
+  public getUnverifiedUserByEmail(email: string): Promise<UserEntity | undefined> {
     return this.usersRepository.getUnverifiedUserByEmail(email);
   }
 
@@ -46,6 +46,14 @@ export default class UsersService {
 
   public async getUnverifiedUserById(id: number): Promise<UserEntity | undefined> {
     return this.usersRepository.getUnverifiedUserById(id);
+  }
+
+  async setTwoFactorAuthenticationSecret(secret: string, userId: number) {
+    return this.usersRepository.updateEntityById(userId, { twoFactorAuthenticationSecret: secret });
+  }
+
+  async turnOnTwoFactorAuthentication(userId: number) {
+    return this.usersRepository.updateEntityById(userId, { isTwoFactorAuthenticationEnabled: true });
   }
 
   update(id: number, data: UpdateUserDto): Promise<UpdateResult> {

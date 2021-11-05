@@ -49,7 +49,7 @@ export default class UsersRepository {
   }
 
   public async getById(id: number): Promise<UserEntity | undefined> {
-    return  this.usersModel.findOne(id);
+    return this.usersModel.findOne(id);
   }
 
   public async getVerifiedUserById(id: number): Promise<UserEntity | undefined> {
@@ -62,6 +62,10 @@ export default class UsersRepository {
     return this.usersModel.findOne(id, {
       where: [{ verified: false }],
     });
+  }
+
+  public updateEntityById(id: number, data: Partial<UserEntity>): Promise<UpdateResult> {
+    return this.usersModel.update(id, data);
   }
 
   public updateById(id: number, data: UpdateUserDto): Promise<UpdateResult> {
