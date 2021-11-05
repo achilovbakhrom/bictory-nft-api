@@ -1,4 +1,4 @@
-# Nest.js boilerplate
+# BICTORY NFT API
 
 ## Description
 README - BICTORY NFT API
