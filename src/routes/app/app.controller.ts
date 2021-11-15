@@ -1,8 +1,6 @@
-import AppService from './app.service';
+import { Controller, Get } from '@nestjs/common';
 import { ApiOkResponse } from '@nestjs/swagger';
-import {
-  Controller, Get,
-} from '@nestjs/common';
+import AppService from './app.service';
 
 @Controller()
 export default class AppController {
@@ -10,7 +8,7 @@ export default class AppController {
 
   @ApiOkResponse({ description: 'Returns you Hello world!' })
   @Get()
-  sayHello(): string {
-    return this.appService.getHello();
+  openSwagger() {
+    return this.appService.openSwagger();
   }
 }

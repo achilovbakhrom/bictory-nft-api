@@ -10,6 +10,6 @@ export default class AppService {
   }
 
   getHello(): string {
-    return 'Hello world!';
+    return '<a href="/api">go to swagger!</api>';
   }
 }

@@ -17,23 +17,16 @@ import AppController from './app.controller';
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      // host: process.env.POSTGRESQL_HOST || 'postgres',
-      // port: (process.env.POSTGRESQL_PORT as unknown) as number,
-      // database: process.env.POSTGRESQL_DB,
-      // username: process.env.POSTGRESQL_ROOT_USER,
-      // password: process.env.POSTGRESQL_PASSWORD,
-
-      host: 'localhost',
-      port: 5433,
-      database: 'postgres',
-      username: 'postgres',
-      password: 'postgres',
+      host: process.env.POSTGRESQL_HOST,
+      port: (process.env.POSTGRESQL_PORT as unknown) as number,
+      database: process.env.POSTGRESQL_DB,
+      username: process.env.POSTGRESQL_ROOT_USER,
+      password: process.env.POSTGRESQL_PASSWORD,
       entities: ['dist/**/*.entity{.ts,.js}'],
       synchronize: true,
     }),
     RedisModule.register({
-      // url: process.env.REDIS_URL,
-      url: 'redis://localhost:6379',
+      url: process.env.REDIS_URL,
       onClientReady: async (client): Promise<void> => {
         client.on('error', console.error);
         client.on('ready', () => {
